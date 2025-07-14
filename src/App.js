@@ -16,7 +16,8 @@ import {
   FlaskConical, // Ammonia/pH/TDS (general chemistry)
   Activity, // General health/status indicator
   CalendarDays, // Reports
-  Zap, // AI Alert
+  Zap,
+  X, // AI Alert
 } from 'lucide-react';
 
 // Mock Data for the demo
@@ -297,23 +298,19 @@ const Help = ({ data }) => (
 // Main App Component
 const App = () => {
   const [currentPage, setCurrentPage] = useState('waterQuality'); // Default page
+  // New state variable to hold the PWA installation prompt event
+  const [installPrompt, setInstallPrompt] = useState(null);
 
-  // --- START OF useEffect BLOCK ---
-  // This useEffect hook is placed directly inside the App functional component.
-  // It runs once after the initial render (due to the empty dependency array []).
-  // Its purpose is to listen for the 'beforeinstallprompt' event, which is part of PWA functionality.
-  // This makes the 'useEffect' hook "used" and resolves the 'no-unused-vars' linting error.
+  // useEffect hook for PWA installation prompt
+  // This runs once after the initial render to listen for the 'beforeinstallprompt' event.
   useEffect(() => {
-    let deferredPrompt; // This variable can store the event for later use (e.g., showing a custom install button)
-
     const handleBeforeInstallPrompt = (e) => {
       // Prevent the default browser prompt for PWA installation
       e.preventDefault();
-      // Store the event so it can be triggered later
-      deferredPrompt = e;
+      // Store the event so it can be triggered later (e.g., by a custom install button)
+      setInstallPrompt(e);
       console.log('PWA installation prompt available.');
       // At this point, you could make a custom "Install App" button visible to the user.
-      // When that button is clicked, you would call deferredPrompt.prompt()
     };
 
     // Add the event listener when the component mounts
@@ -323,8 +320,7 @@ const App = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []); // The empty array [] means this effect runs only once after the initial render and cleanup runs on unmount.
-  // --- END OF useEffect BLOCK ---
+  }, []); // The empty array [] means this effect runs only once after the initial render
 
 
   const renderPage = () => {
@@ -372,6 +368,30 @@ const App = () => {
           {renderPage()}
         </main>
         <NavBar currentPage={currentPage} onNavigate={setCurrentPage} />
+
+        {/* Optional: A button to trigger the PWA installation prompt */}
+        {/* This button will only appear if the browser supports PWA installation and the prompt is available */}
+        {installPrompt && (
+          <button
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50 hover:bg-green-600 transition-colors"
+            onClick={() => {
+              // Show the installation prompt to the user
+              installPrompt.prompt();
+              // Wait for the user to respond to the prompt
+              installPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+                } else {
+                  console.log('User dismissed the install prompt');
+                }
+                // Clear the prompt after it's been used (can only be prompted once per event)
+                setInstallPrompt(null);
+              });
+            }}
+          >
+            Install App
+          </button>
+        )}
       </div>
     </div>
   );
