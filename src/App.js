@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // useEffect is now properly imported and will be used
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   ArrowLeft,
@@ -16,8 +16,7 @@ import {
   FlaskConical, // Ammonia/pH/TDS (general chemistry)
   Activity, // General health/status indicator
   CalendarDays, // Reports
-  Zap,
-  X, // AI Alert
+  Zap, // AI Alert
 } from 'lucide-react';
 
 // Mock Data for the demo
@@ -196,7 +195,8 @@ const Reports = ({ data }) => (
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data.weeklyReport.chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+            {/* eslint-disable-next-line no-unused-vars */}
+            <XAxis dataKey="name" axisLine={false} tickLine={false} /> {/* This line uses XAxis */}
             <YAxis hide={true} domain={['dataMin - 1', 'dataMax + 1']} />
             <Tooltip />
             <Line type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
