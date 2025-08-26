@@ -352,7 +352,7 @@ const App = () => {
     }
 
     // We're going to listen to the document 'latest_readings' in the 'sensors' collection
-    const unsubscribe = onSnapshot(doc(db, "sensors", "latest_readings"), (doc) => {
+    const unsubscribe = onSnapshot(doc(db, "sensors", "aqua-smart-readings"), (doc) => {
       if (doc.exists()) {
         const liveData = doc.data();
         setSensorData(liveData); // Update your state with the new data
