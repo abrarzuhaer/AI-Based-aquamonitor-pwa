@@ -19,7 +19,29 @@ import {
   Zap, // AI Alert
 } from 'lucide-react';
 
-// Mock Data for the demo
+// === FIREBASE IMPORTS AND INITIALIZATION ===
+// We've moved all Firebase-related code here for clarity.
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+
+// Your web app's Firebase configuration
+// !! IMPORTANT: Replace the empty strings below with your actual Firebase config details.
+const firebaseConfig = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+
+// Initialize Firebase and Firestore
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+// === END FIREBASE INITIALIZATION ===
+
+
+// Mock Data for the demo (Used for initial state and other components)
 const mockData = {
   waterQuality: {
     status: 'Normal',
@@ -130,7 +152,6 @@ const WaterQuality = ({ data }) => (
       <h2 className="text-xl font-semibold">Status</h2>
       <p className="text-4xl font-bold mt-2">{data.status}</p>
     </div>
-
     <div className="bg-white p-4 rounded-xl shadow-md space-y-3">
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
         <div className="flex items-center space-x-2">
@@ -175,7 +196,6 @@ const WaterQuality = ({ data }) => (
         <span className="text-lg font-medium text-gray-800">{data.turbidity}</span>
       </div>
     </div>
-
     <button className="w-full bg-blue-500 text-white py-3 rounded-xl shadow-md text-lg font-semibold hover:bg-blue-600 transition-colors">
       Measure
     </button>
@@ -195,8 +215,7 @@ const Reports = ({ data }) => (
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data.weeklyReport.chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-            {/* eslint-disable-next-line no-unused-vars */}
-            <XAxis dataKey="name" axisLine={false} tickLine={false} /> {/* This line uses XAxis */}
+            <XAxis dataKey="name" axisLine={false} tickLine={false} />
             <YAxis hide={true} domain={['dataMin - 1', 'dataMax + 1']} />
             <Tooltip />
             <Line type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
@@ -204,7 +223,6 @@ const Reports = ({ data }) => (
         </ResponsiveContainer>
       </div>
     </div>
-
     <div className="bg-white p-4 rounded-xl shadow-md space-y-3">
       <div className="flex items-center justify-between py-2 border-b border-gray-200">
         <span className="text-lg text-gray-700">Water Health</span>
@@ -218,7 +236,6 @@ const Reports = ({ data }) => (
         AI Advisory &gt;
       </button>
     </div>
-
     <button className="w-full text-blue-500 text-left py-2 hover:bg-gray-100 rounded-lg px-2 transition-colors">
       Previous &gt;
     </button>
@@ -294,39 +311,66 @@ const Help = ({ data }) => (
   </div>
 );
 
-
 // Main App Component
 const App = () => {
-  const [currentPage, setCurrentPage] = useState('waterQuality'); // Default page
-  // New state variable to hold the PWA installation prompt event
+  const [currentPage, setCurrentPage] = useState('waterQuality');
   const [installPrompt, setInstallPrompt] = useState(null);
+  
+  // === NEW STATE VARIABLE FOR LIVE DATA ===
+  const [sensorData, setSensorData] = useState({
+    status: 'Normal',
+    do: '0.0 mg/L',
+    ammonia: '0.0 mg/L',
+    pH: '0.0',
+    tds: '0 ppm',
+    temperature: '0.0°C',
+    turbidity: '0 NTU',
+  });
+  // === END NEW STATE VARIABLE ===
+  
 
-  // useEffect hook for PWA installation prompt
-  // This runs once after the initial render to listen for the 'beforeinstallprompt' event.
+  // === useEffect hook for PWA installation prompt ===
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent the default browser prompt for PWA installation
       e.preventDefault();
-      // Store the event so it can be triggered later (e.g., by a custom install button)
       setInstallPrompt(e);
       console.log('PWA installation prompt available.');
-      // At this point, you could make a custom "Install App" button visible to the user.
     };
-
-    // Add the event listener when the component mounts
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []); // The empty array [] means this effect runs only once after the initial render
+  }, []); // Empty dependency array means it runs once on component mount
+  // === END PWA useEffect ===
+  
+  // === NEW useEffect hook to listen for real-time Firebase updates ===
+  useEffect(() => {
+    // Check if firebaseConfig is not empty to prevent errors
+    if (!firebaseConfig.projectId) {
+      console.warn("Firebase configuration is missing. Cannot connect to Firestore.");
+      return;
+    }
 
+    // We're going to listen to the document 'latest_readings' in the 'sensors' collection
+    const unsubscribe = onSnapshot(doc(db, "sensors", "latest_readings"), (doc) => {
+      if (doc.exists()) {
+        const liveData = doc.data();
+        setSensorData(liveData); // Update your state with the new data
+      } else {
+        console.log("No such document!");
+      }
+    });
+
+    // Unsubscribe from the listener when the component unmounts
+    return () => unsubscribe();
+  }, []); // Empty dependency array means this runs once on component mount
+  // === END Firebase useEffect ===
 
   const renderPage = () => {
     switch (currentPage) {
+      // === UPDATE: Pass the new sensorData state to the WaterQuality component ===
       case 'waterQuality':
-        return <WaterQuality data={mockData.waterQuality} />;
+        return <WaterQuality data={sensorData} />;
       case 'reports':
         return <Reports data={mockData.reports} />;
       case 'alerts':
@@ -334,7 +378,7 @@ const App = () => {
       case 'help':
         return <Help data={mockData.help} />;
       default:
-        return <WaterQuality data={mockData.waterQuality} />;
+        return <WaterQuality data={sensorData} />;
     }
   };
 
@@ -359,32 +403,25 @@ const App = () => {
         <Header
           title={getPageTitle()}
           onBack={() => {
-            // Implement back logic if needed, for now, just navigate to home
             setCurrentPage('waterQuality');
           }}
-          showMore={currentPage === 'reports'} // Show more icon only on reports page
+          showMore={currentPage === 'reports'}
         />
-        <main className="p-4 pb-20"> {/* Add padding-bottom for the fixed navbar */}
+        <main className="p-4 pb-20">
           {renderPage()}
         </main>
         <NavBar currentPage={currentPage} onNavigate={setCurrentPage} />
-
-        {/* Optional: A button to trigger the PWA installation prompt */}
-        {/* This button will only appear if the browser supports PWA installation and the prompt is available */}
         {installPrompt && (
           <button
             className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg z-50 hover:bg-green-600 transition-colors"
             onClick={() => {
-              // Show the installation prompt to the user
               installPrompt.prompt();
-              // Wait for the user to respond to the prompt
               installPrompt.userChoice.then((choiceResult) => {
                 if (choiceResult.outcome === 'accepted') {
                   console.log('User accepted the install prompt');
                 } else {
                   console.log('User dismissed the install prompt');
                 }
-                // Clear the prompt after it's been used (can only be prompted once per event)
                 setInstallPrompt(null);
               });
             }}
