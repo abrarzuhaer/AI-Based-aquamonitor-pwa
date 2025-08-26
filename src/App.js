@@ -145,7 +145,7 @@ const NavBar = ({ currentPage, onNavigate }) => (
   </div>
 );
 
-// Water Quality Page Component
+// // Water Quality Page Component
 const WaterQuality = ({ data }) => (
   <div className="p-4 space-y-4">
     <div className="bg-blue-600 text-white p-4 rounded-xl shadow-md text-center">
@@ -158,20 +158,23 @@ const WaterQuality = ({ data }) => (
           <Droplet size={20} color="#3B82F6" />
           <span className="text-lg text-gray-700">DO</span>
         </div>
-        <span className="text-lg font-medium text-gray-800">{data.do}</span>
+        {/* CORRECTED: Appending the unit string to the value */}
+        <span className="text-lg font-medium text-gray-800">{data.do} mg/L</span>
       </div>
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
         <div className="flex items-center space-x-2">
           <FlaskConical size={20} color="#EF4444" />
           <span className="text-lg text-gray-700">Ammonia</span>
         </div>
-        <span className="text-lg font-medium text-gray-800">{data.ammonia}</span>
+        {/* CORRECTED: Appending the unit string to the value */}
+        <span className="text-lg font-medium text-gray-800">{data.ammonia} ppm</span>
       </div>
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
         <div className="flex items-center space-x-2">
           <FlaskConical size={20} color="#22C55E" />
           <span className="text-lg text-gray-700">pH</span>
         </div>
+        {/* pH does not have a unit, so it's fine as-is */}
         <span className="text-lg font-medium text-gray-800">{data.pH}</span>
       </div>
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
@@ -179,21 +182,24 @@ const WaterQuality = ({ data }) => (
           <Droplet size={20} color="#F59E0B" />
           <span className="text-lg text-gray-700">TDS</span>
         </div>
-        <span className="text-lg font-medium text-gray-800">{data.tds}</span>
+        {/* CORRECTED: Appending the unit string to the value */}
+        <span className="text-lg font-medium text-gray-800">{data.tds} ppm</span>
       </div>
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
         <div className="flex items-center space-x-2">
           <Thermometer size={20} color="#6366F1" />
           <span className="text-lg text-gray-700">Temperature</span>
         </div>
-        <span className="text-lg font-medium text-gray-800">{data.temperature}</span>
+        {/* CORRECTED: Appending the unit string to the value */}
+        <span className="text-lg font-medium text-gray-800">{data.temperature}°C</span>
       </div>
       <div className="flex items-center justify-between py-2 border-b border-gray-200 last:border-b-0">
         <div className="flex items-center space-x-2">
           <Activity size={20} color="#10B981" />
           <span className="text-lg text-gray-700">Turbidity</span>
         </div>
-        <span className="text-lg font-medium text-gray-800">{data.turbidity}</span>
+        {/* CORRECTED: Appending the unit string to the value */}
+        <span className="text-lg font-medium text-gray-800">{data.turbidity} NTU</span>
       </div>
     </div>
     <button className="w-full bg-blue-500 text-white py-3 rounded-xl shadow-md text-lg font-semibold hover:bg-blue-600 transition-colors">
@@ -201,6 +207,8 @@ const WaterQuality = ({ data }) => (
     </button>
   </div>
 );
+
+
 
 // Reports Page Component
 const Reports = ({ data }) => (
