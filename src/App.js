@@ -27,12 +27,12 @@ import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 // Your web app's Firebase configuration
 // !! IMPORTANT: Replace the empty strings below with your actual Firebase config details.
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyAdZR6duEO3Hq1bcJ-yp2bS94TxQ4x0WPA",
+  authDomain: "aquasmart-bd.firebaseapp.com",
+  projectId: "aquasmart-bd",
+  storageBucket: "aquasmart-bd.firebasestorage.app",
+  messagingSenderId: "1038040024984",
+  appId: "1:1038040024984:web:4a5ce00b997f9f46a78ded"
 };
 
 // Initialize Firebase and Firestore
